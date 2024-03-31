@@ -4,8 +4,49 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { update } from "./update";
 import { setupDatabase } from "../database/database";
+import crypto from "crypto";
+import bcrypt from "bcryptjs";
 
+// Database setup
 setupDatabase();
+
+// generateSessionToken
+function generateSessionToken(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    crypto.randomBytes(32, (err: Error | null, buffer: Buffer) => {
+      if (err) {
+        reject(err);
+      } else {
+        const token = buffer.toString("hex");
+        resolve(token);
+      }
+    });
+  });
+}
+
+ipcMain.handle("generateSessionToken", async () => {
+  const token = await generateSessionToken();
+  return token;
+});
+
+function validatePassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
+}
+
+ipcMain.handle(
+  "validatePassword",
+  async (_, password: string, hash: string) => {
+    return validatePassword(password, hash);
+  }
+);
+
+function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 10);
+}
+
+ipcMain.handle("hashPassword", async (_, password: string) => {
+  return hashPassword(password);
+});
 
 globalThis.__filename = fileURLToPath(import.meta.url);
 globalThis.__dirname = dirname(__filename);

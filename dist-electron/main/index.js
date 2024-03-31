@@ -4,6 +4,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import mysql from "mysql2";
+import crypto from "crypto";
+import bcrypt from "bcryptjs";
 const { autoUpdater } = createRequire(import.meta.url)("electron-updater");
 function update(win2) {
   autoUpdater.autoDownload = false;
@@ -89,6 +91,37 @@ const setupDatabase = () => {
   );
 };
 setupDatabase();
+function generateSessionToken() {
+  return new Promise((resolve, reject) => {
+    crypto.randomBytes(32, (err, buffer) => {
+      if (err) {
+        reject(err);
+      } else {
+        const token = buffer.toString("hex");
+        resolve(token);
+      }
+    });
+  });
+}
+ipcMain.handle("generateSessionToken", async () => {
+  const token = await generateSessionToken();
+  return token;
+});
+function validatePassword(password, hash) {
+  return bcrypt.compare(password, hash);
+}
+ipcMain.handle(
+  "validatePassword",
+  async (_, password, hash) => {
+    return validatePassword(password, hash);
+  }
+);
+function hashPassword(password) {
+  return bcrypt.hash(password, 10);
+}
+ipcMain.handle("hashPassword", async (_, password) => {
+  return hashPassword(password);
+});
 globalThis.__filename = fileURLToPath(import.meta.url);
 globalThis.__dirname = dirname(__filename);
 process.env.DIST_ELECTRON = join(__dirname, "../");
