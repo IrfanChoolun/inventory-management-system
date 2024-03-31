@@ -1,37 +1,28 @@
-import { useState, useEffect } from 'react'
-import './App.css'
-import { UserService, User } from './utils/services/UserService'
-import LoginForm from './components/LoginForm'
+import { useEffect } from "react";
+import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+import LoginForm from "./pages/LoginForm";
+import Home from "./pages/Home";
+import NotFound from "./pages/NotFound";
 
 function App() {
-  const [users, setUsers] = useState<User[]>([])
-  const [isLoading, setIsLoading] = useState(true);
-
   useEffect(() => {
     // handleFetchUsers();
   }, []);
-  
-  function handleFetchUsers() {
-    setIsLoading(true);
-    UserService.getUsers().then((users) => {
-      setUsers(users);
-      setIsLoading(false);
-    });
-  }
 
-  
   return (
-    <div className='App'>
-      {/* {isLoading && <p>Loading users...</p>}
-      <ul>
-        {users.map((user) => (
-          <li key={user.id}>{user.first_name} {user.last_name} {user.user_role}</li>
-        ))}
-      </ul>
-      <button onClick={handleFetchUsers}>Fetch Users</button> */}
-      <LoginForm />
-    </div>
-  )
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<LoginForm />} />
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </div>
+    </Router>
+  );
 }
 
-export default App
+export default App;

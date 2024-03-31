@@ -1,10 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { UserService, User } from "../../utils/services/UserService";
+import { useNavigate } from "react-router-dom";
 import "./LoginForm.scss";
 
 function LoginForm() {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+
+  const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -21,6 +24,7 @@ function LoginForm() {
     console.log("Logging in...");
     UserService.userLogin(username, password).then((response) => {
       console.log("Login Success", response);
+      navigate("/home");
     });
   }
 
