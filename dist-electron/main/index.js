@@ -1,59 +1,9 @@
-import { app, ipcMain, dialog, BrowserWindow, shell } from "electron";
+import { dialog, app, ipcMain, BrowserWindow, shell } from "electron";
 import { release } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createRequire } from "node:module";
 import mysql from "mysql2";
-import crypto from "crypto";
 import bcrypt from "bcryptjs";
-const { autoUpdater } = createRequire(import.meta.url)("electron-updater");
-function update(win2) {
-  autoUpdater.autoDownload = false;
-  autoUpdater.disableWebInstaller = false;
-  autoUpdater.allowDowngrade = false;
-  autoUpdater.on("checking-for-update", function() {
-  });
-  autoUpdater.on("update-available", (arg) => {
-    win2.webContents.send("update-can-available", { update: true, version: app.getVersion(), newVersion: arg == null ? void 0 : arg.version });
-  });
-  autoUpdater.on("update-not-available", (arg) => {
-    win2.webContents.send("update-can-available", { update: false, version: app.getVersion(), newVersion: arg == null ? void 0 : arg.version });
-  });
-  ipcMain.handle("check-update", async () => {
-    if (!app.isPackaged) {
-      const error = new Error("The update feature is only available after the package.");
-      return { message: error.message, error };
-    }
-    try {
-      return await autoUpdater.checkForUpdatesAndNotify();
-    } catch (error) {
-      return { message: "Network error", error };
-    }
-  });
-  ipcMain.handle("start-download", (event) => {
-    startDownload(
-      (error, progressInfo) => {
-        if (error) {
-          event.sender.send("update-error", { message: error.message, error });
-        } else {
-          event.sender.send("download-progress", progressInfo);
-        }
-      },
-      () => {
-        event.sender.send("update-downloaded");
-      }
-    );
-  });
-  ipcMain.handle("quit-and-install", () => {
-    autoUpdater.quitAndInstall(false, true);
-  });
-}
-function startDownload(callback, complete) {
-  autoUpdater.on("download-progress", (info) => callback(null, info));
-  autoUpdater.on("error", (error) => callback(error, null));
-  autoUpdater.on("update-downloaded", complete);
-  autoUpdater.downloadUpdate();
-}
 const databaseConfig = {
   HOST: "localhost",
   USER: "root",
@@ -90,38 +40,29 @@ const setupDatabase = () => {
     }
   );
 };
-setupDatabase();
-function generateSessionToken() {
-  return new Promise((resolve, reject) => {
-    crypto.randomBytes(32, (err, buffer) => {
-      if (err) {
-        reject(err);
-      } else {
-        const token = buffer.toString("hex");
-        resolve(token);
-      }
-    });
-  });
-}
-ipcMain.handle("generateSessionToken", async () => {
-  const token = await generateSessionToken();
-  return token;
-});
-function validatePassword(password, hash) {
-  return bcrypt.compare(password, hash);
-}
-ipcMain.handle(
-  "validatePassword",
-  async (_, password, hash) => {
-    return validatePassword(password, hash);
+const userQueries = () => {
+  async function validatePassword(password, hash) {
+    let passwordMatch = await bcrypt.compare(password, hash);
+    if (passwordMatch) {
+      return { success: true };
+    } else {
+      return { success: false };
+    }
   }
-);
-function hashPassword(password) {
-  return bcrypt.hash(password, 10);
-}
-ipcMain.handle("hashPassword", async (_, password) => {
-  return hashPassword(password);
-});
+  ipcMain.on("validatePassword", async (event, password, hashedPassword) => {
+    const validPassword = await validatePassword(password, hashedPassword);
+    event.sender.send("validatePasswordResponse", validPassword);
+  });
+  function hashPassword(password) {
+    return bcrypt.hash(password, 10);
+  }
+  ipcMain.on("hashPassword", async (event, password) => {
+    const hashedPassword = await hashPassword(password);
+    event.sender.send("hashedPasswordGenerated", hashedPassword);
+  });
+};
+setupDatabase();
+userQueries();
 globalThis.__filename = fileURLToPath(import.meta.url);
 globalThis.__dirname = dirname(__filename);
 process.env.DIST_ELECTRON = join(__dirname, "../");
@@ -154,22 +95,22 @@ async function createWindow() {
   });
   if (url) {
     win.loadURL(url);
-    win.webContents.openDevTools();
+    win.maximize();
   } else {
     win.loadFile(indexHtml);
   }
   win.webContents.on("did-finish-load", () => {
     win == null ? void 0 : win.webContents.send("main-process-message", (/* @__PURE__ */ new Date()).toLocaleString());
+    win == null ? void 0 : win.webContents.send("clear-storage");
   });
   win.webContents.setWindowOpenHandler(({ url: url2 }) => {
     if (url2.startsWith("https:"))
       shell.openExternal(url2);
     return { action: "deny" };
   });
-  update(win);
 }
 app.whenReady().then(createWindow);
-app.on("window-all-closed", () => {
+app.on("window-all-closed", async () => {
   win = null;
   if (process.platform !== "darwin")
     app.quit();
@@ -201,6 +142,14 @@ ipcMain.handle("open-win", (_, arg) => {
     childWindow.loadURL(`${url}#${arg}`);
   } else {
     childWindow.loadFile(indexHtml, { hash: arg });
+  }
+});
+app.on("activate", () => {
+  const allWindows = BrowserWindow.getAllWindows();
+  if (allWindows.length) {
+    allWindows[0].focus();
+  } else {
+    createWindow();
   }
 });
 //# sourceMappingURL=index.js.map

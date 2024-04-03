@@ -1,31 +1,40 @@
-import { useState, useEffect, useRef } from "react";
-import { UserService, User } from "../../utils/services/UserService";
+import { useState } from "react";
+import { UserService, User } from "../../utils/UserService";
 import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { addUser } from "./../../utils/slices/userSlice";
 import "./LoginForm.scss";
 
 function LoginForm() {
-  const [username, setUsername] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const users: User = useSelector((state: any) => state.user.value);
+  const dispatch = useDispatch();
 
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
-  function handleUsername(event: any) {
-    setUsername(event.target.value);
-  }
-
-  function handlePassword(event: any) {
-    setPassword(event.target.value);
-  }
-
-  function handleLogin(event: any) {
+  async function handleLogin(event: any) {
     event.preventDefault();
     console.log("Logging in...");
-    UserService.userLogin(username, password).then((response) => {
-      console.log("Login Success", response);
-      navigate("/home");
-    });
+
+    let username = (document.getElementById("username") as HTMLInputElement)
+      .value;
+    let password = (document.getElementById("password") as HTMLInputElement)
+      .value;
+
+    try {
+      const response = await UserService.userLogin(username, password);
+      // Handle success scenario
+      if (response.success) {
+        console.log("Login Success", response);
+        dispatch(addUser(response.user));
+        navigate("/home");
+      } else {
+        console.log(response.error);
+      }
+    } catch (err) {
+      console.error("Login Error:", err);
+    }
   }
 
   function togglePasswordShow(_: any) {
@@ -40,7 +49,7 @@ function LoginForm() {
   }
 
   return (
-    <div className="loginPage">
+    <div className="loginPage full">
       <div className="formContents">
         <div className="left_section">
           <h1>All In One Solution</h1>
@@ -71,8 +80,8 @@ function LoginForm() {
               <label>
                 <span>Username:</span>
                 <input
-                  onChange={handleUsername}
                   type="text"
+                  id="username"
                   name="username"
                   placeholder="Enter Username"
                 />
@@ -80,7 +89,6 @@ function LoginForm() {
               <label>
                 <span>Password:</span>
                 <input
-                  onChange={handlePassword}
                   id="password"
                   type="password"
                   name="password"

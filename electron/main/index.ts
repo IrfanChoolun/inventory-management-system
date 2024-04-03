@@ -2,51 +2,14 @@ import { app, BrowserWindow, shell, ipcMain } from "electron";
 import { release } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { update } from "./update";
 import { setupDatabase } from "../database/database";
-import crypto from "crypto";
-import bcrypt from "bcryptjs";
+import { userQueries } from "../database/Users/UsersTable";
 
 // Database setup
 setupDatabase();
 
-// generateSessionToken
-function generateSessionToken(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    crypto.randomBytes(32, (err: Error | null, buffer: Buffer) => {
-      if (err) {
-        reject(err);
-      } else {
-        const token = buffer.toString("hex");
-        resolve(token);
-      }
-    });
-  });
-}
-
-ipcMain.handle("generateSessionToken", async () => {
-  const token = await generateSessionToken();
-  return token;
-});
-
-function validatePassword(password: string, hash: string): Promise<boolean> {
-  return bcrypt.compare(password, hash);
-}
-
-ipcMain.handle(
-  "validatePassword",
-  async (_, password: string, hash: string) => {
-    return validatePassword(password, hash);
-  }
-);
-
-function hashPassword(password: string): Promise<string> {
-  return bcrypt.hash(password, 10);
-}
-
-ipcMain.handle("hashPassword", async (_, password: string) => {
-  return hashPassword(password);
-});
+// User Queries
+userQueries();
 
 globalThis.__filename = fileURLToPath(import.meta.url);
 globalThis.__dirname = dirname(__filename);
@@ -108,7 +71,8 @@ async function createWindow() {
     // electron-vite-vue#298
     win.loadURL(url);
     // Open devTool if the app is not packaged
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools();
+    win.maximize();
   } else {
     win.loadFile(indexHtml);
   }
@@ -116,6 +80,7 @@ async function createWindow() {
   // Test actively push message to the Electron-Renderer
   win.webContents.on("did-finish-load", () => {
     win?.webContents.send("main-process-message", new Date().toLocaleString());
+    win?.webContents.send("clear-storage");
   });
 
   // Make all links open with the browser, not with the application
@@ -123,14 +88,11 @@ async function createWindow() {
     if (url.startsWith("https:")) shell.openExternal(url);
     return { action: "deny" };
   });
-
-  // Apply electron-updater
-  update(win);
 }
 
 app.whenReady().then(createWindow);
 
-app.on("window-all-closed", () => {
+app.on("window-all-closed", async () => {
   win = null;
   if (process.platform !== "darwin") app.quit();
 });
@@ -152,7 +114,6 @@ app.on("activate", () => {
   }
 });
 
-// New window example arg: new windows url
 ipcMain.handle("open-win", (_, arg) => {
   const childWindow = new BrowserWindow({
     webPreferences: {
@@ -166,5 +127,14 @@ ipcMain.handle("open-win", (_, arg) => {
     childWindow.loadURL(`${url}#${arg}`);
   } else {
     childWindow.loadFile(indexHtml, { hash: arg });
+  }
+});
+
+app.on("activate", () => {
+  const allWindows = BrowserWindow.getAllWindows();
+  if (allWindows.length) {
+    allWindows[0].focus();
+  } else {
+    createWindow();
   }
 });
