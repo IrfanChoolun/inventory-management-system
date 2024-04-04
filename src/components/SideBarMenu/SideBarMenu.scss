@@ -1,0 +1,7 @@
+.MuiDrawer-paper {
+    &.MuiDrawer-paperAnchorLeft {
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+    }
+}
