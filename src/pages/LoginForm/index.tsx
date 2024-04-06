@@ -28,7 +28,7 @@ function LoginForm() {
       if (response.success) {
         console.log("Login Success", response);
         dispatch(addUser(response.user));
-        navigate("/home");
+        navigate("/dashboard");
       } else {
         console.log(response.error);
       }

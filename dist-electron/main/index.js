@@ -40,7 +40,7 @@ const setupDatabase = () => {
     }
   );
 };
-const userQueries = () => {
+const backendQueries = () => {
   async function validatePassword(password, hash) {
     let passwordMatch = await bcrypt.compare(password, hash);
     if (passwordMatch) {
@@ -62,7 +62,7 @@ const userQueries = () => {
   });
 };
 setupDatabase();
-userQueries();
+backendQueries();
 globalThis.__filename = fileURLToPath(import.meta.url);
 globalThis.__dirname = dirname(__filename);
 process.env.DIST_ELECTRON = join(__dirname, "../");

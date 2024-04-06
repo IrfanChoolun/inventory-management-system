@@ -1,7 +1,20 @@
-.MuiDrawer-paper {
-    &.MuiDrawer-paperAnchorLeft {
-        position: relative;
-        display: flex;
-        justify-content: space-between;
+.sidebarmenu {
+    .MuiDrawer-paper {
+        &.MuiDrawer-paperAnchorLeft {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+        }
+    }
+
+    .MuiCollapse-wrapperInner {
+        .MuiListItemButton-root {
+            padding-top: 6px;
+            padding-bottom: 6px;
+        }
+    }
+
+    .MuiListItemIcon-root {
+        min-width: 40px;
     }
 }

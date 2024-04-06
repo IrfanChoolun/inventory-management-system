@@ -3,13 +3,13 @@ import { release } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { setupDatabase } from "../database/database";
-import { userQueries } from "../database/Users/UsersTable";
+import { backendQueries } from "../backendQueries";
 
 // Database setup
 setupDatabase();
 
 // User Queries
-userQueries();
+backendQueries();
 
 globalThis.__filename = fileURLToPath(import.meta.url);
 globalThis.__dirname = dirname(__filename);

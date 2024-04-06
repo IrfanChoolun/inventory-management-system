@@ -9,42 +9,42 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import InboxIcon from "@mui/icons-material/MoveToInbox";
 import "./SideBarMenu.scss";
-import { useState } from "react";
 import Collapse from "@mui/material/Collapse";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import StarBorder from "@mui/icons-material/StarBorder";
+import { useNavigate } from "react-router-dom";
 
 const drawerWidth = 240;
 
-export default function PersistentDrawerLeft({ open }: { open: boolean }) {
-  const [expanded, setExpanded] = useState(true);
-
-  const handleClick = () => {
-    setExpanded(() => !expanded);
+export default function PersistentDrawerLeft({
+  open,
+  expandedItems,
+  setExpandedItems,
+}: {
+  open: boolean;
+  expandedItems: any;
+  setExpandedItems: any;
+}) {
+  const handleClick = (key: string) => {
+    setExpandedItems(() => ({
+      // Set all items to false
+      empty: false,
+      inventory: false,
+      reports: false,
+      suppliers: false,
+      orders: false,
+      users: false,
+      // Set the clicked item to true
+      [key]: true,
+    }));
   };
+
+  const navigate = useNavigate();
+
   return (
-    <Box
-      sx={{
-        width: drawerWidth && open ? drawerWidth : 0,
-        flexShrink: 0,
-        "& .MuiDrawer-paper": {
-          width: drawerWidth && open ? drawerWidth : 0,
-          boxSizing: "border-box",
-        },
-        transition: "width 0.25s",
-        position: "relative",
-        height: "100%",
-        overflowY: "auto",
-        display: "grid",
-        gridTemplateRows: "auto 1fr",
-      }}
-    >
-      <div className="logo_container">
-        <img className="logo" src="src/assets/images/logo.jpg" />
-      </div>
-      <CssBaseline />
-      <Drawer
+    <div className="sidebarmenu">
+      <Box
         sx={{
           width: drawerWidth && open ? drawerWidth : 0,
           flexShrink: 0,
@@ -52,142 +52,349 @@ export default function PersistentDrawerLeft({ open }: { open: boolean }) {
             width: drawerWidth && open ? drawerWidth : 0,
             boxSizing: "border-box",
           },
-          paddingBottom: "24px",
+          transition: "width 0.25s",
+          position: "relative",
+          height: "100%",
+          overflowY: "auto",
+          display: "grid",
+          gridTemplateRows: "auto 1fr",
         }}
-        variant="persistent"
-        anchor="left"
-        open={open}
       >
-        <div className="drawer_top_half">
-          <Divider />
-          <List>
-            <ListItem disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {/* Input Icon here */}
-                  <InboxIcon />
-                </ListItemIcon>
-                <ListItemText primary="Dashboard" />
-              </ListItemButton>
-            </ListItem>
-          </List>
-          <Divider />
-          <List>
-            <ListItem disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {/* Input Icon here */}
-                  <InboxIcon />
-                </ListItemIcon>
-                <ListItemText primary="Inventory" />
-              </ListItemButton>
-            </ListItem>
-          </List>
-          <Divider />
-          <List>
-            <ListItem disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {/* Input Icon here */}
-                  <InboxIcon />
-                </ListItemIcon>
-                <ListItemText primary="Reports" />
-              </ListItemButton>
-            </ListItem>
-          </List>
-          <Divider />
-          <List>
-            <ListItem disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {/* Input Icon here */}
-                  <InboxIcon />
-                </ListItemIcon>
-                <ListItemText primary="Suppliers" />
-              </ListItemButton>
-            </ListItem>
-          </List>
-          <Divider />
-          <List>
-            <ListItem disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {/* Input Icon here */}
-                  <InboxIcon />
-                </ListItemIcon>
-                <ListItemText primary="Orders" />
-              </ListItemButton>
-            </ListItem>
-          </List>
-          <Divider />
-          <List>
-            <ListItem onClick={handleClick} disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {/* Input Icon here */}
-                  <InboxIcon />
-                </ListItemIcon>
-                <ListItemText primary="Users" />
-                {expanded ? <ExpandLess /> : <ExpandMore />}
-              </ListItemButton>
-            </ListItem>
-            <Collapse in={expanded} timeout="auto" unmountOnExit>
-              <List component="div" disablePadding>
-                <ListItemButton sx={{ pl: 4 }}>
-                  <ListItemIcon>
-                    <StarBorder />
-                  </ListItemIcon>
-                  <ListItemText primary="Manage Users" />
-                </ListItemButton>
-              </List>
-              <List component="div" disablePadding>
-                <ListItemButton sx={{ pl: 4 }}>
-                  <ListItemIcon>
-                    <StarBorder />
-                  </ListItemIcon>
-                  <ListItemText primary="Add Users" />
-                </ListItemButton>
-              </List>
-              <List component="div" disablePadding>
-                <ListItemButton sx={{ pl: 4 }}>
-                  <ListItemIcon>
-                    <StarBorder />
-                  </ListItemIcon>
-                  <ListItemText primary="Remove Users" />
-                </ListItemButton>
-              </List>
-            </Collapse>
-          </List>
-          <Divider />
+        <div className="logo_container">
+          <img className="logo" src="src/assets/images/logo.jpg" />
         </div>
-        <div className="drawer_bottom_half">
-          <Divider />
-          <List>
-            <ListItem disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {/* Input Icon here */}
-                  <InboxIcon />
-                </ListItemIcon>
-                <ListItemText primary="Settings" />
-              </ListItemButton>
-            </ListItem>
-          </List>
-          <Divider />
-          <List>
-            <ListItem disablePadding>
-              <ListItemButton>
-                <ListItemIcon>
-                  {/* Input Icon here */}
-                  <InboxIcon />
-                </ListItemIcon>
-                <ListItemText primary="Logout" />
-              </ListItemButton>
-            </ListItem>
-          </List>
-          <Divider />
-        </div>
-      </Drawer>
-    </Box>
+        <CssBaseline />
+        <Drawer
+          sx={{
+            width: drawerWidth && open ? drawerWidth : 0,
+            flexShrink: 0,
+            "& .MuiDrawer-paper": {
+              width: drawerWidth && open ? drawerWidth : 0,
+              boxSizing: "border-box",
+            },
+            paddingBottom: "24px",
+          }}
+          variant="persistent"
+          anchor="left"
+          open={open}
+        >
+          <div className="drawer_top_half">
+            <Divider />
+            {/* Dashboard */}
+            <List>
+              <ListItem
+                disablePadding
+                onClick={(event) => {
+                  handleClick("empty");
+                }}
+              >
+                <ListItemButton onClick={() => navigate("/dashboard")}>
+                  <ListItemIcon>
+                    {/* Input Icon here */}
+                    <InboxIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Dashboard" />
+                </ListItemButton>
+              </ListItem>
+            </List>
+            <Divider />
+            {/* Inventory */}
+            <List>
+              <ListItem
+                onClick={(event) => {
+                  handleClick("inventory");
+                }}
+                disablePadding
+              >
+                <ListItemButton>
+                  <ListItemIcon>
+                    {/* Input Icon here */}
+                    <InboxIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Inventory" />
+                  {expandedItems.inventory ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+              </ListItem>
+              <Collapse
+                in={expandedItems.inventory}
+                timeout="auto"
+                unmountOnExit
+              >
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="View Users" />
+                  </ListItemButton>
+                </List>
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="Add User" />
+                  </ListItemButton>
+                </List>
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="Edit User Permissions" />
+                  </ListItemButton>
+                </List>
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="Delete Users" />
+                  </ListItemButton>
+                </List>
+              </Collapse>
+            </List>
+            <Divider />
+            {/* Reports */}
+            <List>
+              <ListItem
+                onClick={(event) => {
+                  handleClick("reports");
+                }}
+                disablePadding
+              >
+                <ListItemButton>
+                  <ListItemIcon>
+                    {/* Input Icon here */}
+                    <InboxIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Reports" />
+                  {expandedItems.reports ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+              </ListItem>
+              <Collapse in={expandedItems.reports} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="View Users" />
+                  </ListItemButton>
+                </List>
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="Add User" />
+                  </ListItemButton>
+                </List>
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="Edit User Permissions" />
+                  </ListItemButton>
+                </List>
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="Delete Users" />
+                  </ListItemButton>
+                </List>
+              </Collapse>
+            </List>
+            <Divider />
+            {/* Suppliers */}
+            <List>
+              <ListItem
+                onClick={(event) => {
+                  handleClick("suppliers");
+                }}
+                disablePadding
+              >
+                <ListItemButton>
+                  <ListItemIcon>
+                    {/* Input Icon here */}
+                    <InboxIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Suppliers" />
+                  {expandedItems.suppliers ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+              </ListItem>
+              <Collapse
+                in={expandedItems.suppliers}
+                timeout="auto"
+                unmountOnExit
+              >
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="View Users" />
+                  </ListItemButton>
+                </List>
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="Add User" />
+                  </ListItemButton>
+                </List>
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="Edit User Permissions" />
+                  </ListItemButton>
+                </List>
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="Delete Users" />
+                  </ListItemButton>
+                </List>
+              </Collapse>
+            </List>
+            <Divider />
+            {/* Orders */}
+            <List>
+              <ListItem
+                onClick={(event) => {
+                  handleClick("orders");
+                }}
+                disablePadding
+              >
+                <ListItemButton>
+                  <ListItemIcon>
+                    {/* Input Icon here */}
+                    <InboxIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Orders" />
+                  {expandedItems.orders ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+              </ListItem>
+              <Collapse in={expandedItems.orders} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="View Users" />
+                  </ListItemButton>
+                </List>
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="Add User" />
+                  </ListItemButton>
+                </List>
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="Edit User Permissions" />
+                  </ListItemButton>
+                </List>
+                <List component="div" disablePadding>
+                  <ListItemButton sx={{ pl: 4 }}>
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="Delete Users" />
+                  </ListItemButton>
+                </List>
+              </Collapse>
+            </List>
+            <Divider />
+            {/* Users */}
+            <List>
+              <ListItem
+                onClick={(event) => {
+                  handleClick("users");
+                }}
+                disablePadding
+              >
+                <ListItemButton>
+                  <ListItemIcon>
+                    {/* Input Icon here */}
+                    <InboxIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Users" />
+                  {expandedItems.users ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+              </ListItem>
+              <Collapse in={expandedItems.users} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  <ListItemButton
+                    sx={{ pl: 4 }}
+                    onClick={() => navigate("/manageusers")}
+                  >
+                    <ListItemIcon>
+                      <StarBorder />
+                    </ListItemIcon>
+                    <ListItemText primary="Manage Users" />
+                  </ListItemButton>
+                </List>
+              </Collapse>
+            </List>
+            <Divider />
+            {/* My Profile */}
+            <List>
+              <ListItem disablePadding>
+                <ListItemButton>
+                  <ListItemIcon>
+                    {/* Input Icon here */}
+                    <InboxIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="My Profile" />
+                </ListItemButton>
+              </ListItem>
+            </List>
+            <Divider />
+          </div>
+          <div className="drawer_bottom_half">
+            <Divider />
+            {/* Settings */}
+            <List>
+              <ListItem disablePadding>
+                <ListItemButton>
+                  <ListItemIcon>
+                    {/* Input Icon here */}
+                    <InboxIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Settings" />
+                </ListItemButton>
+              </ListItem>
+            </List>
+            <Divider />
+            {/* Logout */}
+            <List>
+              <ListItem disablePadding>
+                <ListItemButton>
+                  <ListItemIcon>
+                    {/* Input Icon here */}
+                    <InboxIcon />
+                  </ListItemIcon>
+                  <ListItemText primary="Logout" />
+                </ListItemButton>
+              </ListItem>
+            </List>
+            <Divider />
+          </div>
+        </Drawer>
+      </Box>
+    </div>
   );
 }

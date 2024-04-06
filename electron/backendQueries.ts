@@ -3,7 +3,7 @@ import { ipcMain } from "electron";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
 
-export const userQueries = () => {
+export const backendQueries = () => {
   // generateSessionToken
   //   function generateSessionToken(): Promise<string> {
   //     return new Promise((resolve, reject) => {
@@ -49,4 +49,9 @@ export const userQueries = () => {
     const hashedPassword = await hashPassword(password);
     event.sender.send("hashedPasswordGenerated", hashedPassword);
   });
+
+  //   ipcMain.on("viewUsers", async (event, password) => {
+  //     const hashedPassword = await viewUsers(password);
+  //     event.sender.send("hashedPasswordGenerated", hashedPassword);
+  //   });
 };
