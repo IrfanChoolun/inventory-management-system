@@ -60,28 +60,76 @@ export const UserService = {
       return { success: false, error: "Internal Server Error" };
     }
   },
-  // addUser: async (user: User): Promise<string | undefined> => {
-  //   try {
-  //     window.ipcRenderer.send("hashPassword", user.password);
-  //     window.ipcRenderer.once(
-  //       "hashedPasswordGenerated",
-  //       async (_, hashedPassword) => {
-  //         const res = await MySQL.runQuery<User>(
-  //           `INSERT INTO users (username, password, first_name, last_name, user_role) VALUES (?, ?, ?, ?, ?)`,
-  //           [
-  //             user.username,
-  //             hashedPassword,
-  //             user.first_name,
-  //             user.last_name,
-  //             user.user_role,
-  //           ]
-  //         );
-  //         return res;
-  //       }
-  //     );
-  //   } catch (err: any) {
-  //     console.error("Error adding user:", err);
-  //     return undefined;
-  //   }
-  // },
+  addUser: async (user: User): Promise<any> => {
+    try {
+      await new Promise<string>((resolve) => {
+        window.ipcRenderer.send("hashPassword", user.password);
+        window.ipcRenderer.once(
+          "hashedPasswordGenerated",
+          async (_, hashedPassword) => {
+            await MySQL.runQuery<User>(
+              `INSERT INTO users (username, password, first_name, last_name, user_role) VALUES (?, ?, ?, ?, ?)`,
+              [
+                user.username,
+                hashedPassword,
+                user.first_name,
+                user.last_name,
+                user.user_role,
+              ]
+            );
+            resolve(hashedPassword);
+          }
+        );
+      });
+      console.log("User added successfully!");
+      return true;
+    } catch (err: any) {
+      console.error("Error adding user:", err);
+      return false;
+    }
+  },
+  editUser: async (user: User): Promise<any> => {
+    try {
+      await MySQL.runQuery<User>(
+        `UPDATE users SET username = ?, first_name = ?, last_name = ?, user_role = ? WHERE id = ?`,
+        [
+          user.username,
+          user.first_name,
+          user.last_name,
+          user.user_role,
+          user.id,
+        ]
+      );
+      if (user.password !== "" && user.password !== undefined) {
+        await new Promise<string>((resolve) => {
+          window.ipcRenderer.send("hashPassword", user.password);
+          window.ipcRenderer.once(
+            "hashedPasswordGenerated",
+            async (_, hashedPassword) => {
+              await MySQL.runQuery<User>(
+                `UPDATE users SET password = ? WHERE id = ?`,
+                [hashedPassword, user.id]
+              );
+              resolve(hashedPassword);
+            }
+          );
+        });
+      }
+      console.log("User updated successfully!");
+      return true;
+    } catch (err: any) {
+      console.error("Error updating user:", err);
+      return false;
+    }
+  },
+  deleteUser: async (user: User): Promise<any> => {
+    try {
+      await MySQL.runQuery<User>(`DELETE FROM users WHERE id = ?`, [user.id]);
+      console.log("User deleted successfully!");
+      return true;
+    } catch (err: any) {
+      console.error("Error deleting user:", err);
+      return false;
+    }
+  },
 };

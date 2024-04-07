@@ -3,7 +3,7 @@ import { UserService, User } from "@/utils/UserService";
 import { useState, useEffect } from "react";
 import "./ManageUsers.scss";
 import type { TableColumnsType, TableProps } from "antd";
-import { Table, Button, Modal, Form, Input, Select } from "antd";
+import { Table, Button, Modal, Form, Input, Select, Popconfirm } from "antd";
 
 type OnChange = NonNullable<TableProps<DataType>["onChange"]>;
 
@@ -11,6 +11,7 @@ type GetSingle<T> = T extends (infer U)[] ? U : never;
 type Sorts = GetSingle<Parameters<OnChange>[2]>;
 
 interface DataType {
+  key: number;
   username: string;
   first_name: string;
   last_name: string;
@@ -20,9 +21,13 @@ interface DataType {
 function ManageUsers({
   expandedItems,
   setExpandedItems,
+  globalUser,
+  setGlobalUser,
 }: {
   expandedItems: any;
   setExpandedItems: any;
+  globalUser: any;
+  setGlobalUser: any;
 }) {
   const [users, setUsers] = useState<User[]>([]);
   const [sortedInfo, setSortedInfo] = useState<Sorts>({});
@@ -31,16 +36,16 @@ function ManageUsers({
   const [confirmLoading, setConfirmLoading] = useState(false);
 
   useEffect(() => {
-    async function fetchUsers() {
-      const users = await UserService.getUsers();
-      setUsers(users);
-    }
-
     fetchUsers();
   }, []);
 
+  async function fetchUsers() {
+    const users = await UserService.getUsers();
+    setUsers(users);
+  }
+
   const data: DataType[] = users.map((user) => ({
-    key: user.id,
+    key: user.id || 0,
     username: user.username || "",
     first_name: user.first_name || "",
     last_name: user.last_name || "",
@@ -53,6 +58,12 @@ function ManageUsers({
   };
 
   const columns: TableColumnsType<DataType> = [
+    {
+      title: "ID",
+      dataIndex: "key",
+      key: "key",
+      hidden: true,
+    },
     {
       title: "Username",
       dataIndex: "username",
@@ -86,26 +97,47 @@ function ManageUsers({
       sortOrder: sortedInfo.columnKey === "user_role" ? sortedInfo.order : null,
       ellipsis: true,
     },
+    {
+      title: "Action",
+      key: "action",
+      render: (_, record) => (
+        <>
+          <a onClick={() => handleEdit(record.key)}>Edit</a>
+          <span> | </span>
+          <Popconfirm
+            title="Are you sure you want to delete this user?"
+            onConfirm={async () => {
+              await handleDelete(record.key);
+            }}
+          >
+            <a>Delete</a>
+          </Popconfirm>
+        </>
+      ),
+    },
   ];
 
   const [addUserForm] = Form.useForm();
   const [editUserForm] = Form.useForm();
 
-  const showModal = (modalType: string) => {
-    if (modalType === "adduser") {
-      setAddUserModalVisible(true);
-    } else if (modalType === "edituser") {
-      setEditUserModalVisible(true);
-    }
-  };
-
   const handleOk = async (modalType: string) => {
     if (modalType === "adduser") {
       try {
         await addUserForm.validateFields();
-        await addUserForm.resetFields();
-        await setAddUserModalVisible(false);
-        await setConfirmLoading(false);
+        // add user to database
+        const values = addUserForm.getFieldsValue();
+        console.log("Received values of form: ", values); // { username: "username", password: "password", first_name: "first_name", last_name: "last_name", user_role: "user" }
+        const res = await UserService.addUser(values);
+        if (res) {
+          await fetchUsers();
+          console.log(res);
+          addUserForm.resetFields();
+          setAddUserModalVisible(false);
+          setConfirmLoading(false);
+        } else {
+          console.log("Failed to add user");
+          setConfirmLoading(false);
+        }
       } catch (errors) {
         setConfirmLoading(false);
         // console.error("Form validation errors:", errors);
@@ -113,9 +145,18 @@ function ManageUsers({
     } else if (modalType === "edituser") {
       try {
         await editUserForm.validateFields();
-        await editUserForm.resetFields();
-        await setEditUserModalVisible(false);
-        await setConfirmLoading(false);
+        const values = editUserForm.getFieldsValue();
+        const res = await UserService.editUser(values);
+        if (res) {
+          await fetchUsers();
+          console.log(res);
+          editUserForm.resetFields();
+          setEditUserModalVisible(false);
+          setConfirmLoading(false);
+        } else {
+          console.log("Failed to edit user");
+          setConfirmLoading(false);
+        }
       } catch (errors) {
         setConfirmLoading(false);
         // console.error("Form validation errors:", errors);
@@ -131,20 +172,43 @@ function ManageUsers({
     }
   };
 
+  const handleEdit = (id: number) => {
+    const user = users.find((user) => user.id === id);
+    if (user) {
+      editUserForm.setFieldsValue({
+        id: user.id,
+        username: user.username,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        user_role: user.user_role,
+      });
+
+      setEditUserModalVisible(true);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    const user = users.find((user) => user.id === id);
+    if (user) {
+      await UserService.deleteUser(user);
+      await fetchUsers();
+    }
+  };
+
   return (
     <CommonLayout
       pageName="manageUsers"
       breadCrumbText="View Users"
       expandedItems={expandedItems}
       setExpandedItems={setExpandedItems}
+      globalUser={globalUser}
+      setGlobalUser={setGlobalUser}
     >
       <div>
         <div className="top_section">
-          <Button type="primary" onClick={() => showModal("adduser")}>
+          <h5>Manage Users</h5>
+          <Button type="primary" onClick={() => setAddUserModalVisible(true)}>
             Add User
-          </Button>
-          <Button type="primary" onClick={() => showModal("edituser")}>
-            Edit User
           </Button>
         </div>
         <Table columns={columns} dataSource={data} onChange={handleChange} />
@@ -224,6 +288,9 @@ function ManageUsers({
             initialValues={{ layout: "vertical", user_role: "user" }}
             style={{ maxWidth: 600 }}
           >
+            <Form.Item name="id" label="ID" hidden={true}>
+              <Input />
+            </Form.Item>
             <Form.Item
               name="username"
               label="Username"
@@ -231,11 +298,7 @@ function ManageUsers({
             >
               <Input placeholder="Enter Username" />
             </Form.Item>
-            <Form.Item
-              name="password"
-              label="Password"
-              rules={[{ required: true, message: "Password is required" }]}
-            >
+            <Form.Item name="password" label="Password">
               <Input placeholder="Enter Password" />
             </Form.Item>
             <Form.Item

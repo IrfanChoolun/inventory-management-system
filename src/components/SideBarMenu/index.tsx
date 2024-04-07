@@ -21,10 +21,14 @@ export default function PersistentDrawerLeft({
   open,
   expandedItems,
   setExpandedItems,
+  globalUser,
+  setGlobalUser,
 }: {
   open: boolean;
   expandedItems: any;
   setExpandedItems: any;
+  globalUser: any;
+  setGlobalUser: any;
 }) {
   const handleClick = (key: string) => {
     setExpandedItems(() => ({
@@ -38,6 +42,13 @@ export default function PersistentDrawerLeft({
       // Set the clicked item to true
       [key]: true,
     }));
+  };
+
+  const handleLogout = async () => {
+    // Logout logic here
+    console.log("Logging out...");
+    setGlobalUser({});
+    await navigate("/");
   };
 
   const navigate = useNavigate();
@@ -319,37 +330,46 @@ export default function PersistentDrawerLeft({
             </List>
             <Divider />
             {/* Users */}
-            <List>
-              <ListItem
-                onClick={(event) => {
-                  handleClick("users");
-                }}
-                disablePadding
-              >
-                <ListItemButton>
-                  <ListItemIcon>
-                    {/* Input Icon here */}
-                    <InboxIcon />
-                  </ListItemIcon>
-                  <ListItemText primary="Users" />
-                  {expandedItems.users ? <ExpandLess /> : <ExpandMore />}
-                </ListItemButton>
-              </ListItem>
-              <Collapse in={expandedItems.users} timeout="auto" unmountOnExit>
-                <List component="div" disablePadding>
-                  <ListItemButton
-                    sx={{ pl: 4 }}
-                    onClick={() => navigate("/manageusers")}
+            {(globalUser.user_role == "super_administrator" ||
+              globalUser.user_role == "administrator") && (
+              <>
+                <List>
+                  <ListItem
+                    onClick={(event) => {
+                      handleClick("users");
+                    }}
+                    disablePadding
                   >
-                    <ListItemIcon>
-                      <StarBorder />
-                    </ListItemIcon>
-                    <ListItemText primary="Manage Users" />
-                  </ListItemButton>
+                    <ListItemButton>
+                      <ListItemIcon>
+                        {/* Input Icon here */}
+                        <InboxIcon />
+                      </ListItemIcon>
+                      <ListItemText primary="Users" />
+                      {expandedItems.users ? <ExpandLess /> : <ExpandMore />}
+                    </ListItemButton>
+                  </ListItem>
+                  <Collapse
+                    in={expandedItems.users}
+                    timeout="auto"
+                    unmountOnExit
+                  >
+                    <List component="div" disablePadding>
+                      <ListItemButton
+                        sx={{ pl: 4 }}
+                        onClick={() => navigate("/manageusers")}
+                      >
+                        <ListItemIcon>
+                          <StarBorder />
+                        </ListItemIcon>
+                        <ListItemText primary="Manage Users" />
+                      </ListItemButton>
+                    </List>
+                  </Collapse>
                 </List>
-              </Collapse>
-            </List>
-            <Divider />
+                <Divider />
+              </>
+            )}
             {/* My Profile */}
             <List>
               <ListItem disablePadding>
@@ -382,7 +402,7 @@ export default function PersistentDrawerLeft({
             {/* Logout */}
             <List>
               <ListItem disablePadding>
-                <ListItemButton>
+                <ListItemButton onClick={handleLogout}>
                   <ListItemIcon>
                     {/* Input Icon here */}
                     <InboxIcon />

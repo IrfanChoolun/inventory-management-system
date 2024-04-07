@@ -12,12 +12,16 @@ function CommonLayout({
   breadCrumbText,
   expandedItems,
   setExpandedItems,
+  globalUser,
+  setGlobalUser,
 }: {
   children: React.ReactNode;
   pageName: string;
   breadCrumbText: string;
   expandedItems: any;
   setExpandedItems: any;
+  globalUser: any;
+  setGlobalUser: any;
 }) {
   const [open, setOpen] = useState(true);
 
@@ -41,6 +45,8 @@ function CommonLayout({
           open={open}
           expandedItems={expandedItems}
           setExpandedItems={setExpandedItems}
+          globalUser={globalUser}
+          setGlobalUser={setGlobalUser}
         />
         <Layout>
           <Header>

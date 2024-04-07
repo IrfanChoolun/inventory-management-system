@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { UserService, User } from "../../utils/UserService";
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { addUser } from "./../../utils/slices/userSlice";
 import "./LoginForm.scss";
 
-function LoginForm() {
-  const users: User = useSelector((state: any) => state.user.value);
-  const dispatch = useDispatch();
-
+function LoginForm({
+  globalUser,
+  setGlobalUser,
+}: {
+  globalUser: any;
+  setGlobalUser: any;
+}) {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -27,7 +28,7 @@ function LoginForm() {
       // Handle success scenario
       if (response.success) {
         console.log("Login Success", response);
-        dispatch(addUser(response.user));
+        setGlobalUser(response.user);
         navigate("/dashboard");
       } else {
         console.log(response.error);

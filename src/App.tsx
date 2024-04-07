@@ -1,4 +1,4 @@
-import React, { useEffect, createContext, useState } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LoginForm from "./pages/LoginForm";
@@ -21,23 +21,46 @@ function App() {
     users: false,
   });
 
+  const [globalUser, setGlobalUser] = useState({});
+
+  console.log(globalUser);
+
   return (
     <Provider store={store}>
       <Router>
         <div className="App full">
           <Routes>
-            <Route path="/" element={<LoginForm />} />
-            <Route path="/login" element={<LoginForm />} />
+            <Route
+              path="/"
+              element={
+                <LoginForm
+                  globalUser={globalUser}
+                  setGlobalUser={setGlobalUser}
+                />
+              }
+            />
             <Route
               path="/dashboard"
               element={
                 <Dashboard
                   expandedItems={expandedItems}
                   setExpandedItems={setExpandedItems}
+                  globalUser={globalUser}
+                  setGlobalUser={setGlobalUser}
                 />
               }
             />
-            <Route path="*" element={<NotFound />} />
+            <Route
+              path="*"
+              element={
+                <NotFound
+                // expandedItems={expandedItems}
+                // setExpandedItems={setExpandedItems}
+                // globalUser={globalUser}
+                // setGlobalUser={setGlobalUser}
+                />
+              }
+            />
             {/* Views */}
             <Route
               path="/manageusers"
@@ -45,6 +68,8 @@ function App() {
                 <ManageUsers
                   expandedItems={expandedItems}
                   setExpandedItems={setExpandedItems}
+                  globalUser={globalUser}
+                  setGlobalUser={setGlobalUser}
                 />
               }
             />

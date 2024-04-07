@@ -1,6 +1,7 @@
 .manageUsers {
     .top_section {
-        text-align: right;
+        display: flex;
+        justify-content: space-between;
         margin-bottom: 20px;
 
         button {
