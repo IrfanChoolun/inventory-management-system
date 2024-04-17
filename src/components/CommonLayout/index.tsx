@@ -9,7 +9,7 @@ const { Header, Content } = Layout;
 function CommonLayout({
   children,
   pageName,
-  breadCrumbText,
+  // breadCrumbText,
   expandedItems,
   setExpandedItems,
   globalUser,
@@ -17,7 +17,7 @@ function CommonLayout({
 }: {
   children: React.ReactNode;
   pageName: string;
-  breadCrumbText: string;
+  // breadCrumbText: string;
   expandedItems: any;
   setExpandedItems: any;
   globalUser: any;

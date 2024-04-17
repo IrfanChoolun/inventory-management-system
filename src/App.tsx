@@ -8,76 +8,88 @@ import store from "./store";
 import { Provider } from "react-redux";
 // Views
 import ManageUsers from "./pages/ManageUsers";
+import ManageProducts from "./pages/ManageProducts";
 
 function App() {
-  useEffect(() => {}, []); // Empty for now
+	useEffect(() => {}, []); // Empty for now
 
-  const [expandedItems, setExpandedItems] = useState({
-    empty: false,
-    inventory: false,
-    reports: false,
-    suppliers: false,
-    orders: false,
-    users: false,
-  });
+	const [expandedItems, setExpandedItems] = useState({
+		empty: false,
+		inventory: false,
+		reports: false,
+		suppliers: false,
+		orders: false,
+		users: false,
+	});
 
-  const [globalUser, setGlobalUser] = useState({});
+	const [globalUser, setGlobalUser] = useState({});
 
-  console.log(globalUser);
+	// console.log(globalUser);
 
-  return (
-    <Provider store={store}>
-      <Router>
-        <div className="App full">
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <LoginForm
-                  globalUser={globalUser}
-                  setGlobalUser={setGlobalUser}
-                />
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <Dashboard
-                  expandedItems={expandedItems}
-                  setExpandedItems={setExpandedItems}
-                  globalUser={globalUser}
-                  setGlobalUser={setGlobalUser}
-                />
-              }
-            />
-            <Route
-              path="*"
-              element={
-                <NotFound
-                // expandedItems={expandedItems}
-                // setExpandedItems={setExpandedItems}
-                // globalUser={globalUser}
-                // setGlobalUser={setGlobalUser}
-                />
-              }
-            />
-            {/* Views */}
-            <Route
-              path="/manageusers"
-              element={
-                <ManageUsers
-                  expandedItems={expandedItems}
-                  setExpandedItems={setExpandedItems}
-                  globalUser={globalUser}
-                  setGlobalUser={setGlobalUser}
-                />
-              }
-            />
-          </Routes>
-        </div>
-      </Router>
-    </Provider>
-  );
+	return (
+		<Provider store={store}>
+			<Router>
+				<div className="App full">
+					<Routes>
+						<Route
+							path="/"
+							element={
+								<LoginForm
+									globalUser={globalUser}
+									setGlobalUser={setGlobalUser}
+								/>
+							}
+						/>
+						<Route
+							path="/dashboard"
+							element={
+								<Dashboard
+									expandedItems={expandedItems}
+									setExpandedItems={setExpandedItems}
+									globalUser={globalUser}
+									setGlobalUser={setGlobalUser}
+								/>
+							}
+						/>
+						<Route
+							path="*"
+							element={
+								<NotFound
+								// expandedItems={expandedItems}
+								// setExpandedItems={setExpandedItems}
+								// globalUser={globalUser}
+								// setGlobalUser={setGlobalUser}
+								/>
+							}
+						/>
+						{/* Views */}
+						<Route
+							path="/manageusers"
+							element={
+								<ManageUsers
+									expandedItems={expandedItems}
+									setExpandedItems={setExpandedItems}
+									globalUser={globalUser}
+									setGlobalUser={setGlobalUser}
+								/>
+							}
+						/>
+						<Route
+							path="/all-products"
+							element={
+								<ManageProducts
+									expandedItems={expandedItems}
+									setExpandedItems={setExpandedItems}
+									globalUser={globalUser}
+									setGlobalUser={setGlobalUser}
+								/>
+							}
+						/>
+					</Routes>
+				</div>
+			</Router>
+		</Provider>
+	);
 }
 
 export default App;
